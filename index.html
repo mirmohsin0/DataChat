@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Cyber Chat</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    /* Animated gradient background */
+    body {
+      background: linear-gradient(-45deg, #0f0c29, #302b63, #24243e, #ff00cc);
+      background-size: 400% 400%;
+      animation: gradientMove 10s ease infinite;
+    }
+
+    @keyframes gradientMove {
+      0% {background-position: 0% 50%;}
+      50% {background-position: 100% 50%;}
+      100% {background-position: 0% 50%;}
+    }
+
+    /* Neon glow */
+    .neon {
+      box-shadow: 0 0 10px #00ffff, 0 0 20px #ff00ff;
+    }
+
+    /* Button ripple effect */
+    .btn {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .btn::after {
+      content: "";
+      position: absolute;
+      width: 0;
+      height: 0;
+      background: rgba(255,255,255,0.4);
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      top: 50%;
+      left: 50%;
+      transition: width 0.4s, height 0.4s;
+    }
+
+    .btn:active::after {
+      width: 200px;
+      height: 200px;
+    }
+
+    /* Message animation */
+    .msg {
+      animation: pop 0.4s ease;
+    }
+
+    @keyframes pop {
+      from { transform: scale(0.8); opacity: 0; }
+      to { transform: scale(1); opacity: 1; }
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center text-white">
+
+<div class="w-full max-w-6xl p-6 rounded-2xl backdrop-blur-xl bg-black/40 border border-white/20 shadow-2xl">
+
+  <h1 class="text-4xl text-center mb-6 font-bold text-transparent bg-clip-text bg-gradient-to-r from-pink-400 to-cyan-400">
+    ⚡ Cyber Chat System
+  </h1>
+
+  <!-- Input -->
+  <div class="flex gap-3 mb-6">
+    <input id="username" placeholder="Username"
+      class="flex-1 p-3 rounded-xl bg-black/50 border border-cyan-500 focus:ring-2 focus:ring-pink-500">
+
+    <input id="message" placeholder="Message"
+      class="flex-1 p-3 rounded-xl bg-black/50 border border-pink-500 focus:ring-2 focus:ring-cyan-500">
+
+    <button onclick="sendMessage()" 
+      class="btn px-6 py-3 rounded-xl bg-gradient-to-r from-cyan-500 to-pink-500 neon">
+      Send ⚡
+    </button>
+  </div>
+
+  <!-- Chat -->
+  <div class="h-96 overflow-y-auto space-y-3 mb-6" id="chat"></div>
+
+  <!-- Search -->
+  <div class="grid grid-cols-2 gap-4">
+    <input id="searchUser" placeholder="Search user"
+      class="p-3 rounded-xl bg-black/50 border border-cyan-500">
+
+    <input id="searchKeyword" placeholder="Search keyword"
+      class="p-3 rounded-xl bg-black/50 border border-pink-500">
+  </div>
+
+  <div class="flex gap-4 mt-3">
+    <button onclick="searchUser()" class="btn flex-1 bg-cyan-500 p-3 rounded-xl">Search User</button>
+    <button onclick="searchKeyword()" class="btn flex-1 bg-pink-500 p-3 rounded-xl">Search Keyword</button>
+  </div>
+
+  <div id="results" class="mt-4 space-y-2"></div>
+
+</div>
+
+<script>
+
+const BASE_URL = "http://127.0.0.1:8000";
+
+function createMessage(msg) {
+  return `
+    <div class="msg p-3 rounded-xl bg-gradient-to-r from-purple-600 to-blue-500 shadow-lg">
+      <div class="text-xs opacity-70">${msg.time}</div>
+      <div class="font-bold">${msg.user}</div>
+      <div>${msg.message}</div>
+    </div>
+  `;
+}
+
+async function loadMessages() {
+  const res = await fetch(`${BASE_URL}/messages`);
+  const data = await res.json();
+
+  const chat = document.getElementById("chat");
+  chat.innerHTML = "";
+
+  data.reverse().forEach(m => {
+    chat.innerHTML += createMessage(m);
+  });
+}
+
+async function sendMessage() {
+  const username = document.getElementById("username").value;
+  const message = document.getElementById("message").value;
+
+  await fetch(`${BASE_URL}/send?username=${username}&message=${message}`, {
+    method: "POST"
+  });
+
+  document.getElementById("message").value = "";
+  loadMessages();
+}
+
+async function searchUser() {
+  const username = document.getElementById("searchUser").value;
+  const res = await fetch(`${BASE_URL}/search/user?username=${username}`);
+  const data = await res.json();
+
+  showResults(data);
+}
+
+async function searchKeyword() {
+  const keyword = document.getElementById("searchKeyword").value;
+  const res = await fetch(`${BASE_URL}/search/keyword?keyword=${keyword}`);
+  const data = await res.json();
+
+  showResults(data);
+}
+
+function showResults(data) {
+  const results = document.getElementById("results");
+  results.innerHTML = "";
+
+  data.forEach(m => {
+    results.innerHTML += createMessage(m);
+  });
+}
+
+loadMessages();
+
+</script>
+
+</body>
+</html>
