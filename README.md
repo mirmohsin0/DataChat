@@ -37,9 +37,7 @@ README.md         → Project documentation
 ### 1. Install dependencies
 ```bash
 pip install fastapi uvicorn
-2. Start server
 uvicorn main:app --reload
-3. Open in browser:
 http://127.0.0.1:8000/docs
 
 
