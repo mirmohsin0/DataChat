@@ -5,7 +5,7 @@ from backend import add_message, get_all_messages, search_user, search_keyword
 
 app = FastAPI()
 
-# ✅ ADD ONLY ONCE
+#  ADD ONLY ONCE
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
